@@ -9,21 +9,25 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 
 public class GameJFrame extends JFrame implements ActionListener {
 
-    //获取界面中的隐藏容器，现在统一获取了，后面直接用就可以了
-    public static Container container = null;
+    //获取界面中的隐藏容器
+    //现在统一获取了，后面直接用就可以了
+    public Container container = null;
 
     //管理抢地主和不抢两个按钮
-    JButton[] landlord = new JButton[2];
+    JButton landlord[] = new JButton[2];
 
     //管理出牌和不要两个按钮
-    JButton[] publishCard = new JButton[2];
+    JButton publishCard[] = new JButton[2];
+
+    int dizhuFlag;
+    int turn;
 
     //游戏界面中地主的图标
     JLabel dizhu;
+
 
     //集合嵌套集合
     //大集合中有三个小集合
@@ -35,7 +39,7 @@ public class GameJFrame extends JFrame implements ActionListener {
 
     //集合嵌套集合
     //大集合中有三个小集合
-    //小集合中装着每一个玩家手上的牌
+    //小集合中装着每一个玩家的牌
     //0索引：左边的电脑玩家
     //1索引：中间的自己
     //2索引：右边的电脑玩家
@@ -53,9 +57,14 @@ public class GameJFrame extends JFrame implements ActionListener {
     //2索引：右边的电脑玩家
     JTextField time[] = new JTextField[3];
 
+    //用户操作，涉及多线程的知识
+    PlayerOperation po;
+
+    boolean nextPlayer = false;
+
     public GameJFrame() {
-        //设置任务栏的图标
-        setIconImage(Toolkit.getDefaultToolkit().getImage("farmerandlord\\image\\poker\\dizhu.png"));
+        //设置图标
+        setIconImage(Toolkit.getDefaultToolkit().getImage("E:\\NGJava\\untitled\\src\\BlackMaNext\\com\\lele\\farmerandlord\\image\\dizhu.png"));
         //设置界面
         initJframe();
         //添加组件
@@ -63,26 +72,31 @@ public class GameJFrame extends JFrame implements ActionListener {
         //界面显示出来
         //先展示界面再发牌，因为发牌里面有动画，界面不展示出来，动画无法展示
         this.setVisible(true);
-
         //初始化牌
-        //准备牌，洗牌，发牌，排序
-        initCard();
+        //准备牌，洗牌，发牌
+        new Thread(this::initCard).start();
+
+
         //打牌之前的准备工作
         //展示抢地主和不抢地主两个按钮并且再创建三个集合用来装三个玩家准备要出的牌
         initGame();
+
     }
 
-    //初始化牌（准备牌，洗牌，发牌，排序）
+
+    //初始化牌
+    //准备牌，洗牌，发牌
     public void initCard() {
         //准备牌
-        //把所有的牌，包括大小王都添加到牌盒pokerList当中
+        //把所有的牌，包括大小王都添加到牌盒cardList当中
         for (int i = 1; i <= 5; i++) {
             for (int j = 1; j <= 13; j++) {
                 if ((i == 5) && (j > 2)) {
                     break;
                 } else {
-                    Poker poker = new Poker(i + "-" + j, false);
+                    Poker poker = new Poker(this, i + "-" + j, false);
                     poker.setLocation(350, 150);
+
                     pokerList.add(poker);
                     container.add(poker);
                 }
@@ -97,19 +111,18 @@ public class GameJFrame extends JFrame implements ActionListener {
         ArrayList<Poker> player1 = new ArrayList<>();
         ArrayList<Poker> player2 = new ArrayList<>();
 
-        //发牌
         for (int i = 0; i < pokerList.size(); i++) {
             //获取当前遍历的牌
             Poker poker = pokerList.get(i);
 
             //发三张底牌
             if (i <= 2) {
+                //移动牌
+                Common.move(poker, poker.getLocation(), new Point(270 + (75 * i), 10));
                 //把底牌添加到集合中
                 lordList.add(poker);
-                Common.move(poker, poker.getLocation(), new Point(270 + (75 * i), 10));
                 continue;
             }
-
             //给三个玩家发牌
             if (i % 3 == 0) {
                 //给左边的电脑发牌
@@ -117,16 +130,16 @@ public class GameJFrame extends JFrame implements ActionListener {
                 player0.add(poker);
             } else if (i % 3 == 1) {
                 //给中间的自己发牌
-                Common. move(poker, poker.getLocation(), new Point(180 + i * 7, 450));
+                Common.move(poker, poker.getLocation(), new Point(180 + i * 7, 450));
                 player1.add(poker);
                 //把自己的牌展示正面
                 poker.turnFront();
+
             } else if (i % 3 == 2) {
                 //给右边的电脑发牌
-                Common. move(poker, poker.getLocation(), new Point(700, 60 + i * 5));
+                Common.move(poker, poker.getLocation(), new Point(700, 60 + i * 5));
                 player2.add(poker);
             }
-
             //把三个装着牌的小集合放到大集合中方便管理
             playerList.add(player0);
             playerList.add(player1);
@@ -137,82 +150,19 @@ public class GameJFrame extends JFrame implements ActionListener {
 
         }
 
-        //排序
+        //给牌排序
         for (int i = 0; i < 3; i++) {
-            order(playerList.get(i));
-            Common.rePosition(this,playerList.get(i),i);
+            //排序
+            Common.order(playerList.get(i));
+            //重新摆放顺序
+            Common.rePosition(this, playerList.get(i), i);
         }
+
+
 
 
 
     }
-
-    //排序
-    public void order(ArrayList<Poker> list) {
-        //此处可以改为lambda表达式
-        Collections.sort(list, new Comparator<Poker>() {
-            @Override
-            public int compare(Poker o1, Poker o2) {
-                //获取o1的花色和价值
-                int color1 = Integer.parseInt(o1.getName().substring(0, 1));
-                int value1 = getValue(o1);
-
-                //获取o2的花色和价值
-                int color2 = Integer.parseInt(o2.getName().substring(0, 1));
-                int value2 = getValue(o2);
-
-                //倒序排列
-                //细节：
-                //图形化界面当中，牌倒着摆放
-                int flag = value2 - value1;
-
-                //如果牌的价值一样，则按照花色排序
-                if (flag == 0){
-                    return color2 - color1;
-                }else {
-                    return flag;
-                }
-            }
-        });
-    }
-
-    //获取每一张牌的价值
-    public int getValue(Poker poker) {
-        //获取牌的名字 1-1
-        String name = poker.getName();
-        //获取牌的花色
-        int color = Integer.parseInt(poker.getName().substring(0, 1));
-        //获取牌对应的数字,同时也是牌的价值
-        int value = Integer.parseInt(name.substring(2));
-
-        //在本地文件中，每张牌的文件名为：数字1-数字2
-        //数字1表示花色，数字2表示牌的数字
-        //其中3~K对应的数字2，可以视为牌的价值
-        //所以，我们单独判断大小王，A，2即可
-
-        //计算大小王牌的价值
-        if (color == 5){
-            //小王的初始价值为1，在1的基础上加100，小王价值为：101
-            //大王的初始价值为2，在2的基础上加100，大王价值为：102
-            return value += 100;
-        }
-
-        //计算A的价值
-        if (value == 1){
-            //A的初始价值为1，在1的基础上加20，大王价值为：21
-            return value += 20;
-        }
-
-        //计算2的价值
-        if (value == 2){
-            //2的初始价值为2，在2的基础上加30，大王价值为：32
-            return value += 30;
-        }
-
-        //如果不是大小王，不是A，不是2，牌的价值就是牌对应的数字
-        return value;
-    }
-
 
     //打牌之前的准备工作
     private void initGame() {
@@ -228,20 +178,81 @@ public class GameJFrame extends JFrame implements ActionListener {
         landlord[1].setVisible(true);
 
         //展示自己前面的倒计时文本
-        for (JTextField field : time) {
-            field.setText("倒计时30秒");
-            field.setVisible(true);
-        }
+        time[1].setVisible(true);
+        //倒计时10秒
+        po = new PlayerOperation(this, 30);
+        //开启倒计时
+        po.start();
 
     }
 
-
-
-
-
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == landlord[0]) {
+            //点击抢地主
+            time[1].setText("抢地主");
+            po.isRun = false;
+        } else if (e.getSource() == landlord[1]) {
+            //点击不抢
+            time[1].setText("不抢");
+            po.isRun = false;
+        } else if (e.getSource() == publishCard[1]) {
+            //点击不要
+            this.nextPlayer = true;
+            currentList.get(1).clear();
+            time[1].setText("不要");
+        } else if (e.getSource() == publishCard[0]) {
+            //点击出牌
 
+            //创建一个临时的集合，用来存放当前要出的牌
+            ArrayList<Poker> c = new ArrayList<>();
+            //获取中自己手上所有的牌
+            ArrayList<Poker> player2 = playerList.get(1);
+
+            //遍历手上的牌，把要出的牌都放到临时集合中
+            for (int i = 0; i < player2.size(); i++) {
+                Poker poker = player2.get(i);
+                if (poker.isClicked()) {
+                    c.add(poker);
+                }
+            }
+
+            int flag = 0;
+            //判断，如果左右两个电脑玩家是否都不要
+            if (time[0].getText().equals("不要") && time[2].getText().equals("不要")) {
+                if (Common.jugdeType(c) != PokerType.c0){
+                    flag = 1;
+                }
+            } else {
+                flag = Common.checkCards(c, currentList, this);
+            }
+
+            if (flag == 1) {
+                //把当前要出的牌，放到大集合中统一管理
+                currentList.set(1, c);
+                //在手上的牌中，去掉已经出掉的牌
+                player2.removeAll(c);
+
+                //计算坐标并移动牌
+                //移动的目的是要出的牌移动到上方
+                Point point = new Point();
+                point.x = (770 / 2) - (c.size() + 1) * 15 / 2;
+                point.y = 300;
+                for (int i = 0, len = c.size(); i < len; i++) {
+                    Poker poker = c.get(i);
+                    Common.move(poker, poker.getLocation(), point);
+                    point.x += 15;
+                }
+
+                //重新摆放剩余的牌
+                Common.rePosition(this, player2, 1);
+                //赢藏文本提示
+                time[1].setVisible(false);
+                //下一个玩家可玩
+                this.nextPlayer = true;
+            }
+
+        }
     }
 
     //添加组件
@@ -306,7 +317,7 @@ public class GameJFrame extends JFrame implements ActionListener {
 
 
         //创建地主图标
-        dizhu = new JLabel(new ImageIcon("images/dizhu.png"));
+        dizhu = new JLabel(new ImageIcon("doudizhu\\image\\dizhu.png"));
         dizhu.setVisible(false);
         dizhu.setSize(40, 40);
         container.add(dizhu);
@@ -334,8 +345,5 @@ public class GameJFrame extends JFrame implements ActionListener {
         //设置背景颜色
         container.setBackground(Color.LIGHT_GRAY);
     }
-
-
-
 
 }

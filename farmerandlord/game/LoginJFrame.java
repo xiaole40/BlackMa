@@ -23,6 +23,7 @@ public class LoginJFrame extends JFrame implements MouseListener {
     JButton login = new JButton();
     JButton register = new JButton();
     JTextField username = new JTextField();
+    //JTextField password = new JTextField();
     JPasswordField password = new JPasswordField();
     JTextField code = new JTextField();
 
@@ -33,13 +34,12 @@ public class LoginJFrame extends JFrame implements MouseListener {
     public LoginJFrame() {
         //初始化界面
         initJFrame();
-        //初始化组件，在这个界面中添加内容
+        //在这个界面中添加内容
         initView();
         //让当前界面显示出来
         this.setVisible(true);
     }
 
-    //在这个界面中添加内容
     public void initView() {
         //1. 添加用户名文字
         Font usernameFont = new Font(null,1,16);
@@ -95,7 +95,7 @@ public class LoginJFrame extends JFrame implements MouseListener {
 
         //5.添加登录按钮
         login.setBounds(123, 310, 128, 47);
-        login.setIcon(new ImageIcon("..\\untitled\\image\\farmerandlord\\login\\登录按下.png"));
+        login.setIcon(new ImageIcon("doudizhu\\image\\login\\登录按钮.png"));
         //去除按钮的边框
         login.setBorderPainted(false);
         //去除按钮的背景
@@ -106,7 +106,7 @@ public class LoginJFrame extends JFrame implements MouseListener {
 
         //6.添加注册按钮
         register.setBounds(256, 310, 128, 47);
-        register.setIcon(new ImageIcon("..\\untitled\\image\\farmerandlord\\login\\注册按钮.png"));
+        register.setIcon(new ImageIcon("doudizhu\\image\\login\\注册按钮.png"));
         //去除按钮的边框
         register.setBorderPainted(false);
         //去除按钮的背景
@@ -117,13 +117,13 @@ public class LoginJFrame extends JFrame implements MouseListener {
 
 
         //7.添加背景图片
-        JLabel background = new JLabel(new ImageIcon("..\\untitled\\image\\farmerandlord\\login\\background.png"));
+        JLabel background = new JLabel(new ImageIcon("doudizhu\\image\\login\\background.png"));
         background.setBounds(0, 0, 633, 423);
         this.getContentPane().add(background);
 
     }
 
-    //初始化组件，在这个界面中添加内容
+
     public void initJFrame() {
         this.setSize(633, 423);//设置宽高
         this.setTitle("斗地主游戏 V1.0登录");//设置标题
@@ -133,16 +133,19 @@ public class LoginJFrame extends JFrame implements MouseListener {
         this.setLayout(null);//取消内部默认布局
     }
 
+
+
     //点击
     @Override
     public void mouseClicked(MouseEvent e) {
-        Object obj = e.getSource();
-        if (obj == login) {
+        if (e.getSource() == login) {
+            System.out.println("点击了登录按钮");
             //获取两个文本输入框中的内容
             String usernameInput = username.getText();
             String passwordInput = password.getText();
             //获取用户输入的验证码
             String codeInput = code.getText();
+
 
             //判断验证码是否为空
             if (codeInput.length() == 0) {
@@ -174,17 +177,17 @@ public class LoginJFrame extends JFrame implements MouseListener {
             } else {
                 showJDialog("用户名或密码错误");
             }
-
-        } else if (obj == register) {
+        } else if (e.getSource() == register) {
             System.out.println("点击了注册按钮");
-        } else if (obj == rightCode) {
+        } else if (e.getSource() == rightCode) {
+            System.out.println("更换验证码");
             //获取一个新的验证码
             String code = CodeUtil.getCode();
             rightCode.setText(code);
         }
     }
 
-    //展示弹框
+
     public void showJDialog(String content) {
         //创建一个弹框对象
         JDialog jDialog = new JDialog();
@@ -209,19 +212,20 @@ public class LoginJFrame extends JFrame implements MouseListener {
     @Override
     public void mousePressed(MouseEvent e) {
         if (e.getSource() == login) {
-            login.setIcon(new ImageIcon("..\\untitled\\image\\farmerandlord\\login\\登录按下.png"));
+            login.setIcon(new ImageIcon("E:\\NGJava\\untitled\\src\\BlackMaNext\\com\\lele\\farmerandlord\\image\\login\\登录按下.png"));
         } else if (e.getSource() == register) {
-            register.setIcon(new ImageIcon("..\\untitled\\image\\farmerandlord\\login\\注册按下.png"));
+            register.setIcon(new ImageIcon("doudizhu\\image\\login\\注册按下.png"));
         }
     }
+
 
     //松开按钮
     @Override
     public void mouseReleased(MouseEvent e) {
         if (e.getSource() == login) {
-            login.setIcon(new ImageIcon("..\\untitled\\image\\farmerandlord\\login\\登录按钮.png"));
+            login.setIcon(new ImageIcon("E:\\NGJava\\untitled\\src\\BlackMaNext\\com\\lele\\farmerandlord\\image\\login\\登录按钮.png"));
         } else if (e.getSource() == register) {
-            register.setIcon(new ImageIcon("..\\untitled\\image\\farmerandlord\\login\\注册按钮.png"));
+            register.setIcon(new ImageIcon("E:\\NGJava\\untitled\\src\\BlackMaNext\\com\\lele\\farmerandlord\\image\\login\\注册按钮.png"));
         }
     }
 
