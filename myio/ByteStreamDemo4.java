@@ -30,7 +30,7 @@ public class ByteStreamDemo4 {
         //1.创建对象
         FileOutputStream fos = new FileOutputStream("..\\untitled\\a.txt");
         //2.写出数据
-        String str = "kankelaoyezuishuai";
+        String str = "abcde";
         byte[] bytes1 = str.getBytes();
         fos.write(bytes1);
 
