@@ -17,7 +17,7 @@ public class FileDemo4 {
         //如果当前路径表示的文件是存在的，则创建失败，方法返回fasle
         //细节2：如果父级路径是不存在的，那么方法会有异常IOException
         //细节3：createNewFile方法创建的一定是文件，如果路径中不包括后缀名，则创建一个没有后缀的文件
-        File f1 = new File("D:\\aaa\\c.txt");
+        File f1 = new File("D:\\aaa\\userinfo.txt");
         boolean b = f1.createNewFile();
         System.out.println(b);
 

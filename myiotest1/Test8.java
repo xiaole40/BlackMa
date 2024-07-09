@@ -23,7 +23,7 @@ public class Test8 {
         list.add(s2);
         list.add(s3);
 
-        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("..\\untitled\\c.txt"));
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("..\\untitled\\userinfo.txt"));
         /*oos.writeObject(s1);
         oos.writeObject(s2);
         oos.writeObject(s3);*/

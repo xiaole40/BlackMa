@@ -25,7 +25,7 @@ public class FileDemo2 {
         System.out.println("------------------------------");
 
         //3.对一个不存在的路径进行判断
-        File f3 = new File("D:\\aaa\\c.txt");
+        File f3 = new File("D:\\aaa\\userinfo.txt");
         System.out.println(f3.isDirectory());//true
         System.out.println(f3.isFile());//false
         System.out.println(f3.exists());//true

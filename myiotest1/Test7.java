@@ -16,7 +16,7 @@ public class Test7 {
 
         //1.把文件中的数字读取到内存中
         //原则：IO随用随创建，什么时候不用什么时候关闭
-        BufferedReader br = new BufferedReader(new FileReader("..\\untitled\\c.txt"));
+        BufferedReader br = new BufferedReader(new FileReader("..\\untitled\\userinfo.txt"));
         String line = br.readLine();
         int count = Integer.parseInt(line);
         //表示当前软件又运行了一次
