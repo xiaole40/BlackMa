@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.*;
-import java.lang.reflect.Field;
+import java.util.Properties;
 import java.util.Random;
 
 public class GameJFrame extends JFrame implements KeyListener, ActionListener {
@@ -42,7 +42,6 @@ public class GameJFrame extends JFrame implements KeyListener, ActionListener {
     //定义变量用来统计步数
     int step = 0;
 
-
     //创建选项下面的条目对象
     JMenuItem girl = new JMenuItem("美女");
     JMenuItem animal = new JMenuItem("动物");
@@ -68,10 +67,8 @@ public class GameJFrame extends JFrame implements KeyListener, ActionListener {
 
     JMenuItem accountItem = new JMenuItem("公众号");
 
-
     //创建随机对象
     Random r = new Random();
-
 
     public GameJFrame() {
         //初始化界面
@@ -90,7 +87,6 @@ public class GameJFrame extends JFrame implements KeyListener, ActionListener {
         this.setVisible(true);
 
     }
-
 
     //初始化数据（打乱）
     private void initData() {
@@ -198,7 +194,6 @@ public class GameJFrame extends JFrame implements KeyListener, ActionListener {
         JMenu aboutJMenu = new JMenu("关于我们");
         JMenu changeImage = new JMenu("更换图片");
 
-
         //把5个存档，添加到saveJMenu中
         saveJMenu.add(saveItem0);
         saveJMenu.add(saveItem1);
@@ -256,19 +251,19 @@ public class GameJFrame extends JFrame implements KeyListener, ActionListener {
         //读取存档信息，修改菜单上表示的内容
         getGameInfo();
 
-
         //给整个界面设置菜单
         this.setJMenuBar(jMenuBar);
     }
 
+
     public void getGameInfo(){
-        //1.创建一个File对象表示所有存档所在的文件夹
+        //1.创建File对象表示所有存档所在的文件夹
         File file = new File("E:\\NGJava\\untitled\\src\\BlackMaNext\\com\\lele\\puzzlegame\\puzzlegame\\save");
-        //2.进入文件夹获取里面所有的存档文件
+        //2.进入文件夹获取到里面所有的存档文件
         File[] files = file.listFiles();
         //3.遍历数组，得到每一个存档
         for (File f : files) {
-            //f : 依次表示每一个存档文件
+            //f ：依次表示每一个存档文件
             //获取每一个存档文件中的步数
             GameInfo gi = null;
             try {
@@ -280,20 +275,27 @@ public class GameJFrame extends JFrame implements KeyListener, ActionListener {
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
-            //获取到步数
+            //获取到了步数
             int step = gi.getStep();
 
             //把存档的步数同步到菜单当中
+            //save0 ---> 0
+            //save1 ---> 1
+            //...
+
             //获取存档的文件名 save0.data
             String name = f.getName();
-            //获取到存档的序号（索引）
+            //获取当存档的序号（索引）
             int index = name.charAt(4) - '0';
             //修改菜单上所表示的文字信息
             saveJMenu.getItem(index).setText("存档" + index + "(" + step + ")步");
             loadJMenu.getItem(index).setText("存档" + index + "(" + step + ")步");
-
         }
+
     }
+
+
+
 
     private void initJFrame() {
         //设置界面的宽高
@@ -470,29 +472,33 @@ public class GameJFrame extends JFrame implements KeyListener, ActionListener {
             System.exit(0);
         } else if (obj == accountItem) {
             System.out.println("公众号");
-            //创建一个弹框对象
-            JDialog jDialog = new JDialog();
-            //创建一个管理图片的容器对象JLabel
-            JLabel jLabel = new JLabel(new ImageIcon("E:\\NGJava\\untitled\\src\\BlackMaNext\\com\\lele\\puzzlegame\\puzzlegame\\image\\about.png"));
-            //设置位置和宽高
-            jLabel.setBounds(0, 0, 258, 258);
-            //把图片添加到弹框当中
-            jDialog.getContentPane().add(jLabel);
-            //给弹框设置大小
-            jDialog.setSize(344, 344);
-            //让弹框置顶
-            jDialog.setAlwaysOnTop(true);
-            //让弹框居中
-            jDialog.setLocationRelativeTo(null);
-            //弹框不关闭则无法操作下面的界面
-            jDialog.setModal(true);
-            //让弹框显示出来
-            jDialog.setVisible(true);
+            //1.创建集合
+            Properties prop = new Properties();
+            //2.读取数据
+            try {
+                FileInputStream fis = new FileInputStream("E:\\NGJava\\untitled\\src\\BlackMaNext\\com\\lele\\puzzlegame\\game.properties");
+                prop.load(fis);
+                fis.close();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+            //3.获取图片的路径
+            String path = (String) prop.get("account");
+
+            //读取配置文件中的信息
+
+            showJDialog(path);
+
+            //调用下面的showJDialog方法，展示弹框
+            //showJDialog方法的参数，就是图片的路径
+            //showJDialog("E:\\NGJava\\untitled\\src\\BlackMaNext\\com\\lele\\puzzlegame\\puzzlegame\\image\\about.png");
+
+
         } else if (obj == girl) {
             System.out.println("girl");
             //下列代码重复了，自己思考一下，能否抽取成一个方法呢？
             int number = r.nextInt(13) + 1;
-            path = "E:\\NGJava\\untitled\\src\\BlackMaNext\\com\\lele\\puzzlegame\\puzzlegame\\image\\girl\\girl" + number + "\\";
+            path = "puzzlegame\\image\\girl\\girl" + number + "\\";
             //计步器清零
             step = 0;
             //再次打乱二维数组中的数据
@@ -521,29 +527,26 @@ public class GameJFrame extends JFrame implements KeyListener, ActionListener {
             initData();
             //重新加载图片
             initImage();
-        }else if(obj == saveItem0 || obj == saveItem1 || obj == saveItem2 || obj == saveItem3 ||obj == saveItem4){
+        } else if (obj == saveItem0 || obj == saveItem1 || obj == saveItem2 || obj == saveItem3 || obj == saveItem4) {
             //获取当前是哪个存档被点击了，获取其中的序号
             JMenuItem item = (JMenuItem) obj;
             String str = item.getText();
             int index = str.charAt(2) - '0';
 
-
             //直接把游戏的数据写到本地文件中
             try {
                 ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("E:\\NGJava\\untitled\\src\\BlackMaNext\\com\\lele\\puzzlegame\\puzzlegame\\save\\save" + index + ".data"));
                 GameInfo gi = new GameInfo(data, x, y, path, step);
-                IoUtil.writeObj(oos,true,gi);
-
+                IoUtil.writeObj(oos, true, gi);
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
             //修改一下存档item上的展示信息
             //存档0(XX步)
-            item.setText("存档" + index + "(" + step + ")步");
+            item.setText("存档" + index + "(" + step + "步)");
             //修改一下读档item上的展示信息
-            loadJMenu.getItem(index).setText("读档" + index + "(" + step + ")步");
-
-        }else if(obj == loadItem0 || obj == loadItem1 || obj == loadItem2 || obj == loadItem3 ||obj == loadItem4){
+            loadJMenu.getItem(index).setText("存档" + index + "(" + step + "步)");
+        } else if (obj == loadItem0 || obj == loadItem1 || obj == loadItem2 || obj == loadItem3 || obj == loadItem4) {
             //获取当前是哪个读档被点击了，获取其中的序号
             JMenuItem item = (JMenuItem) obj;
             String str = item.getText();
@@ -569,6 +572,38 @@ public class GameJFrame extends JFrame implements KeyListener, ActionListener {
 
             //重新刷新界面加载游戏
             initImage();
+        }
+    }
+
+
+    //创建一个弹框对象
+    JDialog jDialog = new JDialog();
+    //展示弹框
+    public void showJDialog(String filepath) {
+        if(!jDialog.isVisible()){
+            JLabel jLabel = null;
+            //判断传递的字符串是否是一个路径，且必须以jpg或者png结尾
+            //如果满足，则当做图片处理
+            //如果不满足，则当做普通字符串处理
+            if(new File(filepath).exists() && (filepath.endsWith(".png")||filepath.endsWith(".jpg") )){
+                jLabel = new JLabel(new ImageIcon(filepath));
+            }else{
+                jLabel = new JLabel(filepath);
+            }
+            //设置位置和宽高
+            jLabel.setBounds(0, 0, 258, 258);
+            //把图片添加到弹框当中
+            jDialog.getContentPane().add(jLabel);
+            //给弹框设置大小
+            jDialog.setSize(344, 344);
+            //让弹框置顶
+            jDialog.setAlwaysOnTop(true);
+            //让弹框居中
+            jDialog.setLocationRelativeTo(null);
+            //弹框不关闭则无法操作下面的界面
+            jDialog.setModal(true);
+            //让弹框显示出来
+            jDialog.setVisible(true);
         }
     }
 }
